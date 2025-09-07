@@ -10,3 +10,31 @@ Currently, two official plugins are available:
 ## Expanding the ESLint configuration
 
 If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+
+# 📚 Book Library
+
+A simple **Book Library frontend application** built with **React, Vite, and Tailwind CSS**.  
+It allows users to search for books and view results using the [Open Library API](https://openlibrary.org/developers/api).
+
+---
+
+## 🚀 Getting Started
+
+Follow these steps to run the project locally:
+
+### 1. Clone the repository
+```bash
+git clone https://github.com/your-username/book-library.git
+cd book-library
+
+## Run Locally
+npm install
+npm run dev
+The app will be available at:
+http://localhost:5173/
+
+## 🛠️ Built With
+[React](https://react.dev/) – UI library
+[Vite](https://vitejs.dev/) – Build tool
+[Tailwind CSS](https://tailwindcss.com/) – Styling framework
+[Open Library API](https://openlibrary.org/developers/api)– Book data source
