@@ -1,60 +1,82 @@
-import { useState } from 'react'
-import './App.css'
+import { useState } from 'react';
+import './App.css';
 import './styles/index.css';
-
-
+import SearchBar from './components/SearchBar.jsx';
+import BookCard from './components/BookCard.jsx';
 
 function App() {
   const [query, setQuery] = useState('');
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSearch = async () => {
-    if (!query) return;
-    setLoading(true);
-    try {
-      const response = await fetch(`https://openlibrary.org/search.json?q=${query}`);
-      const data = await response.json();
-      setBooks(data.docs.slice(0, 10)); // get first 10 results
-    } catch (error) {
-      console.error('Error fetching books:', error);
+  async function handleSearch() {
+    const trimmed = query.trim();
+    if (!trimmed) {
+      setError('Please enter a search query (title, author, or keyword).');
+      setBooks([]);
+      return;
     }
-    setLoading(false);
-  };
+
+    setError('');
+    setLoading(true);
+    setBooks([]);
+
+    try {
+      const response = await fetch(
+        `https://openlibrary.org/search.json?q=${encodeURIComponent(trimmed)}&limit=20`
+      );
+      if (!response.ok) throw new Error('Network response was not ok');
+      const data = await response.json();
+
+      if (!data.docs || data.docs.length === 0) {
+        setError('No results found. Try a different query.');
+        setBooks([]);
+      } else {
+        const mappedBooks = data.docs.map((doc) => ({
+          key: doc.key,
+          title: doc.title,
+          author_name: doc.author_name || [],
+          publisher: doc.publisher ? doc.publisher[0] : 'Unknown',
+          cover_i: doc.cover_i || null,
+          first_publish_year: doc.first_publish_year || null,
+          isbn: doc.isbn ? doc.isbn[0] : null,
+        }));
+        setBooks(mappedBooks);
+      }
+    } catch (err) {
+      console.error('Error fetching books:', err);
+      setError('There was an error fetching results. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <h1 className="text-3xl font-bold mb-4">Book Library</h1>
 
-      <div className="mb-4 flex gap-2">
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search for a book..."
-          className="border p-2 rounded w-full max-w-md"
-        />
-        <button
-          onClick={handleSearch}
-          className="bg-blue-500 text-white px-4 rounded hover:bg-blue-600"
-        >
-          Search
-        </button>
-      </div>
+      <SearchBar
+        query={query}
+        onQueryChange={(v) => setQuery(v)}
+        onSearch={handleSearch}
+      />
 
-      {loading && <p>Loading...</p>}
+      {loading && <p className="mt-4">Loading...</p>}
 
-      <ul className="space-y-2">
+      {error && !loading && (
+        <p className="mt-4 text-red-600">{error}</p>
+      )}
+
+      {!loading && !error && books.length === 0 && (
+        <p className="mt-4">No results yet. Try searching for a book.</p>
+      )}
+
+      <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
         {books.map((book) => (
-          <li key={book.key} className="p-4 bg-white rounded shadow">
-            <h2 className="font-semibold">{book.title}</h2>
-            {book.author_name && <p>Author: {book.author_name.join(', ')}</p>}
-            {book.first_publish_year && <p>First Published: {book.first_publish_year}</p>}
-          </li>
+          <BookCard key={book.key} book={book} />
         ))}
-      </ul>
-
-      {books.length === 0 && !loading && <p>No results yet. Try searching for a book.</p>}
+      </div>
     </div>
   );
 }
