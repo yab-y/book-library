@@ -18,7 +18,12 @@ export default function SearchBar({ query, onQueryChange, onSearch }) {
       />
       <button
         onClick={onSearch}
-        className="px-4 py-2 rounded bg-sky-600 text-white font-medium hover:bg-sky-700"
+        disabled={!query.trim()}
+        className={`px-4 py-2 rounded font-medium text-white transition ${
+    query.trim()
+      ? "bg-sky-600 hover:bg-sky-700"
+      : "bg-slate-300 cursor-not-allowed"
+  }`}
       >
         Search
       </button>
